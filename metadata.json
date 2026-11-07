@@ -1,0 +1,6 @@
+{
+  "name": "ClearMD - Lossless Metadata Stripper",
+  "description": "Standalone Windows C++17 single-window desktop application and live simulator for stripping EXIF, XMP, IPTC, and private metadata without re-encoding.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
