@@ -8,6 +8,8 @@ documents their exact text.
 Single portable `ClearMD.exe`. No installer, no runtime, no dependencies (native C++17 / Win32, statically linked).
 On every launch it checks GitHub for a newer release; that check is the only network access (no account, no telemetry).
 
+![ClearMD v1.0 main window](docs/screenshot.png)
+
 ---
 
 ## Quick start
