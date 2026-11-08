@@ -14,7 +14,7 @@ User documentation (features, supported formats, status messages, safety notes) 
 Manual MinGW-w64 command:
 ```cmd
 windres ClearMD.rc -O coff -o ClearMD.res.o
-g++ -Wall -Wextra -std=c++17 -O2 -s -municode -mwindows -static -static-libgcc -static-libstdc++ ClearMD.cpp ClearMD.res.o -lcomctl32 -lole32 -lshell32 -loleaut32 -lgdi32 -luser32 -luuid -o ClearMD.exe
+g++ -Wall -Wextra -std=c++17 -O2 -s -municode -mwindows -static -static-libgcc -static-libstdc++ ClearMD.cpp ClearMD.res.o -lcomctl32 -lole32 -lshell32 -loleaut32 -lgdi32 -luser32 -luuid -o ClearMD_v1.0.exe
 ```
 
 The MinGW build needs the POSIX-threads variant of the toolchain (`std::thread`). Link order matters: `-luuid` is required
@@ -36,8 +36,10 @@ a file that fails validation is never written; no function re-encodes image, aud
 
 ## Versioning
 
-`resource.h` holds the file version (`1.0.0.x`, last digit bumped per build) and the title-bar text (`APP_TITLE`, currently `ClearMD v1.0`).
-`manifest.xml`, `CMakeLists.txt` and the docs carry the same number.
+`resource.h` holds the version as two numbers (`1.0`; the second one is bumped per build) and the title-bar text (`APP_TITLE`,
+currently `ClearMD v1.0`). Windows VERSIONINFO still takes four numeric fields, so the build and revision fields stay 0.
+`manifest.xml`, `CMakeLists.txt` and the docs carry the same number, and the build scripts name the output `ClearMD_v<version>.exe`
+by reading `resource.h`.
 
 ## Regenerating the icon
 

@@ -78,8 +78,8 @@ build, a dialog offers to open its release page in the browser; nothing is downl
 
 - It is the **only** network access ClearMD makes. No account, no identifier, no telemetry is sent.
 - Offline, rate-limited or blocked: the check fails silently and the app works exactly as usual.
-- The comparison uses the release tag (`v1.0.0.6`, `v1.1` ...) against the build's file version; missing parts count as zero.
-  Publish releases tagged with the build's full file version (`v1.0.0.7`): a bare `v1.0` counts as `1.0.0.0` and is not offered to a `1.0.0.x` build.
+- Versions have two numbers (`1.0`, `1.1`, ...), and a release is tagged with them: `v1.0`, `v1.1`. The comparison pads
+  missing parts with zero, so `v1.1` is newer than `1.0` while `v1.0` is not.
 - The check runs on a background thread and never delays startup.
 
 ---
@@ -126,8 +126,9 @@ mkdir build && cd build
 cmake ..
 cmake --build . --config Release
 ```
-The result is a single `ClearMD.exe` with the icon, manifest and version info embedded.
-The release build was produced and tested with MinGW-w64 GCC 13 (`-Wall -Wextra`, zero warnings); the MSVC and CMake scripts are provided but were not run for this release.
+The result is a single executable with the icon, manifest and version info embedded, named for the version it carries
+(`ClearMD_v1.0.exe`); the release attaches the same file as `ClearMD.exe` so updates can replace it in place.
+The release build was produced and tested with MinGW-w64 GCC (`-Wall -Wextra`, zero warnings); the MSVC and CMake scripts are provided but were not run for this release.
 
 ### Project layout
 

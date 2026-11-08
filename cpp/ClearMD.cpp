@@ -3,7 +3,7 @@
  *
  * Fully standalone, zero external dependencies (uses native Win32/Shell APIs only).
  * Cross-compiler clean: MSVC (/W4) and MinGW-w64 (-Wall -Wextra).
- * Version: 1.0.0.6
+ * Version: 1.0
  */
 
 #ifndef UNICODE
@@ -2230,10 +2230,11 @@ struct UpdateInfo {
 };
 
 static std::wstring CurrentVersionString() {
+    // Only major.minor is user-visible: the build/revision fields exist because Windows
+    // VERSIONINFO wants four numbers, and they are always 0.
     wchar_t buf[32];
-    StringCchPrintfW(buf, ARRAYSIZE(buf), L"%d.%d.%d.%d",
-                     VER_FILE_VERSION_MAJOR, VER_FILE_VERSION_MINOR,
-                     VER_FILE_VERSION_BUILD, VER_FILE_VERSION_REVISION);
+    StringCchPrintfW(buf, ARRAYSIZE(buf), L"%d.%d",
+                     VER_FILE_VERSION_MAJOR, VER_FILE_VERSION_MINOR);
     return buf;
 }
 

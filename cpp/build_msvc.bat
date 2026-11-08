@@ -11,6 +11,14 @@ if %errorlevel% neq 0 (
     exit /b 1
 )
 
+rem The exe is named for the version it contains, read from resource.h so a bump needs no edit here.
+set "APPVER="
+for /f "tokens=3" %%v in ('findstr /b /c:"#define VER_FILE_VERSION_STR" resource.h') do set "APPVER=%%~v"
+if not defined APPVER (
+    echo Error: VER_FILE_VERSION_STR not found in resource.h.
+    exit /b 1
+)
+
 rc /nologo /fo ClearMD.res ClearMD.rc
 if %errorlevel% neq 0 (
     echo Resource compilation failed.
@@ -21,11 +29,12 @@ cl /W4 /std:c++17 /EHsc /O2 /DUNICODE /D_UNICODE /permissive- /utf-8 ^
    ClearMD.cpp ClearMD.res ^
    /link /SUBSYSTEM:WINDOWS /MACHINE:X64 ^
    user32.lib gdi32.lib comctl32.lib ole32.lib shell32.lib oleaut32.lib ^
-   /OUT:ClearMD.exe
+   /OUT:ClearMD_v%APPVER%.exe
 
 if %errorlevel% equ 0 (
     echo.
-    echo [SUCCESS] Built ClearMD.exe cleanly with /W4 and zero warnings.
+    echo [SUCCESS] Built ClearMD_v%APPVER%.exe cleanly with /W4 and zero warnings.
+    echo Attach it to the release under the unversioned name ClearMD.exe.
 ) else (
     echo.
     echo [ERROR] Build failed.

@@ -8,7 +8,7 @@ const CPP_CODE = `/**
  *
  * Fully standalone, zero external dependencies (uses native Win32/Shell APIs only).
  * Cross-compiler clean: MSVC (/W4) and MinGW-w64 (-Wall -Wextra).
- * Version: 1.0.0.6
+ * Version: 1.0
  */
 
 #ifndef UNICODE
@@ -2235,10 +2235,11 @@ struct UpdateInfo {
 };
 
 static std::wstring CurrentVersionString() {
+    // Only major.minor is user-visible: the build/revision fields exist because Windows
+    // VERSIONINFO wants four numbers, and they are always 0.
     wchar_t buf[32];
-    StringCchPrintfW(buf, ARRAYSIZE(buf), L"%d.%d.%d.%d",
-                     VER_FILE_VERSION_MAJOR, VER_FILE_VERSION_MINOR,
-                     VER_FILE_VERSION_BUILD, VER_FILE_VERSION_REVISION);
+    StringCchPrintfW(buf, ARRAYSIZE(buf), L"%d.%d",
+                     VER_FILE_VERSION_MAJOR, VER_FILE_VERSION_MINOR);
     return buf;
 }
 
@@ -3234,6 +3235,14 @@ if %errorlevel% neq 0 (
     exit /b 1
 )
 
+rem The exe is named for the version it contains, read from resource.h so a bump needs no edit here.
+set "APPVER="
+for /f "tokens=3" %%v in ('findstr /b /c:"#define VER_FILE_VERSION_STR" resource.h') do set "APPVER=%%~v"
+if not defined APPVER (
+    echo Error: VER_FILE_VERSION_STR not found in resource.h.
+    exit /b 1
+)
+
 rc /nologo /fo ClearMD.res ClearMD.rc
 if %errorlevel% neq 0 (
     echo Resource compilation failed.
@@ -3244,11 +3253,12 @@ cl /W4 /std:c++17 /EHsc /O2 /DUNICODE /D_UNICODE /permissive- /utf-8 ^
    ClearMD.cpp ClearMD.res ^
    /link /SUBSYSTEM:WINDOWS /MACHINE:X64 ^
    user32.lib gdi32.lib comctl32.lib ole32.lib shell32.lib oleaut32.lib ^
-   /OUT:ClearMD.exe
+   /OUT:ClearMD_v%APPVER%.exe
 
 if %errorlevel% equ 0 (
     echo.
-    echo [SUCCESS] Built ClearMD.exe cleanly with /W4 and zero warnings.
+    echo [SUCCESS] Built ClearMD_v%APPVER%.exe cleanly with /W4 and zero warnings.
+    echo Attach it to the release under the unversioned name ClearMD.exe.
 ) else (
     echo.
     echo [ERROR] Build failed.
@@ -3268,6 +3278,14 @@ if %errorlevel% neq 0 (
     exit /b 1
 )
 
+rem The exe is named for the version it contains, read from resource.h so a bump needs no edit here.
+set "APPVER="
+for /f "tokens=3" %%v in ('findstr /b /c:"#define VER_FILE_VERSION_STR" resource.h') do set "APPVER=%%~v"
+if not defined APPVER (
+    echo Error: VER_FILE_VERSION_STR not found in resource.h.
+    exit /b 1
+)
+
 windres ClearMD.rc -O coff -o ClearMD.res.o
 if %errorlevel% neq 0 (
     echo Resource compilation failed.
@@ -3277,11 +3295,12 @@ if %errorlevel% neq 0 (
 g++ -Wall -Wextra -std=c++17 -O2 -s -municode -mwindows -static -static-libgcc -static-libstdc++ ^
     ClearMD.cpp ClearMD.res.o ^
     -lcomctl32 -lole32 -lshell32 -loleaut32 -lgdi32 -luser32 -luuid ^
-    -o ClearMD.exe
+    -o ClearMD_v%APPVER%.exe
 
 if %errorlevel% equ 0 (
     echo.
-    echo [SUCCESS] Built ClearMD.exe cleanly with -Wall -Wextra.
+    echo [SUCCESS] Built ClearMD_v%APPVER%.exe cleanly with -Wall -Wextra.
+    echo Attach it to the release under the unversioned name ClearMD.exe.
 ) else (
     echo.
     echo [ERROR] Build failed.
@@ -3305,28 +3324,29 @@ const RESOURCE_H = `#pragma once
 #define IDC_CONFIRM_CANCEL      4002
 #define IDC_CONFIRM_PROGRESS    4003
 
-// Title bar text (shows the app version)
+// Title bar text (shows the app version). tools/bump_version.py keeps it in step with the file version.
 #define APP_TITLE               L"ClearMD v1.0"
 
 #define IDM_REMOVE_SELECTED     3001
 #define IDM_SELECT_ALL          3002
 
-// File Versioning: bump 4th digit on each prompt
+// Versioning: two numbers, major.minor, bumped per build (tools/bump_version.py).
+// Windows VERSIONINFO still takes four numeric fields, so BUILD and REVISION stay 0.
 #define VER_FILE_VERSION_MAJOR      1
 #define VER_FILE_VERSION_MINOR      0
 #define VER_FILE_VERSION_BUILD      0
-#define VER_FILE_VERSION_REVISION   6
+#define VER_FILE_VERSION_REVISION   0
 
-#define VER_FILE_VERSION            1,0,0,6
-#define VER_FILE_VERSION_STR        "1.0.0.6"
+#define VER_FILE_VERSION            1,0,0,0
+#define VER_FILE_VERSION_STR        "1.0"
 
 #define VER_PRODUCT_VERSION_MAJOR    1
 #define VER_PRODUCT_VERSION_MINOR    0
 #define VER_PRODUCT_VERSION_BUILD    0
-#define VER_PRODUCT_VERSION_REVISION 6
+#define VER_PRODUCT_VERSION_REVISION 0
 
-#define VER_PRODUCT_VERSION         1,0,0,6
-#define VER_PRODUCT_VERSION_STR     "1.0.0.6"
+#define VER_PRODUCT_VERSION         1,0,0,0
+#define VER_PRODUCT_VERSION_STR     "1.0"
 
 #define VER_COMPANYNAME_STR         "ClearMD Open Source"
 #define VER_FILEDESCRIPTION_STR     "ClearMD - Lossless Metadata Stripper"
@@ -3339,7 +3359,7 @@ const RESOURCE_H = `#pragma once
 const MANIFEST_XML = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
   <assemblyIdentity
-      version="1.0.0.6"
+      version="1.0.0.0"
       processorArchitecture="*"
       name="ClearMD.ClearMDApp"
       type="win32"
@@ -3374,7 +3394,7 @@ const MANIFEST_XML = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 `;
 
 const CMAKE_TXT = `cmake_minimum_required(VERSION 3.16)
-project(ClearMD VERSION 1.0.0.6 LANGUAGES CXX RC)
+project(ClearMD VERSION 1.0 LANGUAGES CXX RC)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -3393,6 +3413,9 @@ add_executable(ClearMD WIN32
     ClearMD.ico
 )
 # manifest.xml is embedded via ClearMD.rc; do NOT also list it as a source (duplicate-manifest link error on MSVC)
+
+# A build is named for the version it contains; the release attaches it under the unversioned name ClearMD.exe.
+set_target_properties(ClearMD PROPERTIES OUTPUT_NAME "ClearMD_v\${PROJECT_VERSION}")
 
 if(NOT MSVC)
     target_link_options(ClearMD PRIVATE -municode -static -static-libgcc -static-libstdc++)
@@ -3446,7 +3469,7 @@ export const CppSourceViewer: React.FC = () => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'ClearMD_Cpp17_Standalone_v1.0.0.6.zip';
+    a.download = 'ClearMD_Cpp17_Standalone_v1.0.zip';
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -3463,7 +3486,7 @@ export const CppSourceViewer: React.FC = () => {
             <h3 className="font-semibold text-slate-100 flex items-center gap-2">
               Standalone C++17 Windows Source Project
               <span className="text-xs bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded-full">
-                v1.0.0.6
+                v1.0
               </span>
             </h3>
             <p className="text-xs text-slate-400">
@@ -3546,7 +3569,7 @@ export const CppSourceViewer: React.FC = () => {
           Native Win32 WinMain &bull; Common Controls v6 &bull; Shell IFileOpenDialog &bull; DragAcceptFiles
         </span>
         <span className="font-mono text-slate-500">
-          File Version: 1.0.0.6
+          File Version: 1.0
         </span>
       </div>
     </div>

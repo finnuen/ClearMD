@@ -1,6 +1,6 @@
 # ClearMD v1.0 - Release notes
 
-**Release:** v1.0 (file version 1.0.0.6), November 2026
+**Release:** v1.0, November 2026
 **Platform:** Windows 10 / 11, 64-bit. Single portable `ClearMD.exe`, no installer.
 
 ClearMD removes hidden personal metadata from files **without re-encoding** them, so images, audio, video and documents keep
@@ -92,11 +92,14 @@ their exact content.
 
 - Each format handler was run on real files containing metadata (generated with ffmpeg, LibreOffice, python-docx, openpyxl, python-pptx, reportlab, pikepdf, pillow-heif and others). Results were checked for: metadata gone, content identical (decoded audio / video / pixels, document text and cell values), file still opens in its normal reader, running twice gives the same result, and truncated or random input is rejected without any write. Handlers were also run under AddressSanitizer / UndefinedBehaviorSanitizer.
 - The full application was driven under Wine: adding files, right-click menu, Delete, Ctrl+A, the warning, cancelling at the prompt, cancelling during the countdown, a full run, and window resizing.
-- **Not verified in this release:** NTFS alternate-data-stream removal on real NTFS (the test environment cannot emulate it), and the MSVC / CMake build scripts. The release `.exe` was built with MinGW-w64 GCC 13, warning-free.
+- **Not verified in this release:** NTFS alternate-data-stream removal on real NTFS (the test environment cannot emulate it), and the MSVC / CMake build scripts. The release `.exe` was built with MinGW-w64 GCC, warning-free.
 
 ---
 
-## Build history (v1.0)
+## Build history
+
+Builds before the 1.0 release were numbered `1.0.0.x`. The project uses two numbers from 1.0 on (`1.0`, `1.1`, ...), and every
+build that carries a change moves the second one.
 
 | Build | Changes |
 |---|---|
@@ -106,3 +109,4 @@ their exact content.
 | 1.0.0.4 | Any-file support (NTFS streams); GIF, SVG, HEIC / AVIF, AVI, MKV / WebM, AIFF; warning with Proceed / Cancel and 3-second cancellable countdown; resize performance; version in title bar. |
 | 1.0.0.5 | Icon refinement (removed the bumps on the broom). |
 | 1.0.0.6 | Checks GitHub for a newer release on every launch and offers to open its release page. Silent when offline or when no release exists. |
+| 1.0 | Version numbering changed to `major.minor`; the release is retagged `v1.0` with the same code as 1.0.0.6. |

@@ -28,7 +28,7 @@ export default function App() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'ClearMD_Cpp17_Standalone_v1.0.0.6.zip';
+    a.download = 'ClearMD_Cpp17_Standalone_v1.0.zip';
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -46,7 +46,7 @@ export default function App() {
               <div className="flex items-center gap-2">
                 <span className="font-bold text-base text-slate-100 tracking-tight">ClearMD</span>
                 <span className="text-[10px] bg-blue-500/10 text-blue-400 border border-blue-500/30 px-2 py-0.5 rounded-full font-mono font-medium">
-                  v1.0.0.6
+                  v1.0
                 </span>
                 <span className="hidden sm:inline-flex text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded-full font-medium">
                   100% C++17 Win32
@@ -306,7 +306,7 @@ export default function App() {
       <footer className="border-t border-slate-900 bg-slate-950 py-5 text-center text-xs text-slate-500">
         <p className="flex items-center justify-center gap-1.5">
           <Sparkles className="w-3.5 h-3.5 text-blue-500" />
-          ClearMD &bull; Native Windows C++17 Lossless Metadata Stripper &bull; File Version 1.0.0.6
+          ClearMD &bull; Native Windows C++17 Lossless Metadata Stripper &bull; File Version 1.0
         </p>
       </footer>
     </div>

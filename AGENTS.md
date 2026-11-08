@@ -6,14 +6,15 @@ User-facing behaviour is documented in `README.md`; what changed per build is in
 ## 1. What this is
 
 ClearMD is a **single-window native Windows app** (C++17, Win32, no third-party libraries) that removes metadata from files
-*without re-encoding them*. One source file, `cpp/ClearMD.cpp` (~3,000 lines), builds one portable `ClearMD.exe`.
+*without re-encoding them*. One source file, `cpp/ClearMD.cpp` (~3,000 lines), builds one portable executable, named for its version
+(`ClearMD_v1.0.exe`) and attached to a release under the unversioned name `ClearMD.exe`.
 
 `src/` is a **secondary** React demo (a simulator plus a viewer of the C++ source). The product is the `.exe`.
 
 ```
 cpp/ClearMD.cpp        the app: format handlers + processing pipeline + Win32 UI
 cpp/ClearMD.rc         icon, version info, manifest (resource ids come from resource.h)
-cpp/resource.h         control ids, APP_TITLE ("ClearMD v1.0"), file version 1.0.0.x
+cpp/resource.h         control ids, APP_TITLE ("ClearMD v1.0"), version 1.0 (major.minor)
 cpp/manifest.xml       Common Controls v6, per-monitor DPI, Windows 10 compat, long paths
 cpp/ClearMD.ico        7-size icon;  cpp/make_icon.py redraws it (run inside cpp/, needs Pillow)
 cpp/build_mingw.bat  build_msvc.bat  CMakeLists.txt
@@ -29,11 +30,13 @@ sudo apt-get install -y g++-mingw-w64-x86-64-posix binutils-mingw-w64-x86-64   #
 cd cpp
 x86_64-w64-mingw32-windres ClearMD.rc -O coff -o /tmp/ClearMD.res.o
 x86_64-w64-mingw32-g++ -Wall -Wextra -std=c++17 -O2 -s -municode -mwindows -static -static-libgcc -static-libstdc++ \
-    ClearMD.cpp /tmp/ClearMD.res.o -lcomctl32 -lole32 -lshell32 -loleaut32 -lgdi32 -luser32 -luuid -o ClearMD.exe
+    ClearMD.cpp /tmp/ClearMD.res.o -lcomctl32 -lole32 -lshell32 -loleaut32 -lgdi32 -luser32 -luuid -o ClearMD_v1.0.exe
 ```
 Required flags, and why: `-municode` (wWinMain), `-luuid` (CLSID_FileOpenDialog - omitting it is a link error), `-static*`
 (the exe must run with only system DLLs; it imports COMCTL32/GDI32/KERNEL32/msvcrt/ole32/SHELL32/USER32 and nothing else),
 `-Wall -Wextra` (**the build must stay at zero warnings**).
+The two build scripts and CMake read `VER_FILE_VERSION_STR` from `resource.h` and name the output `ClearMD_v<version>.exe`, so a
+version bump renames the build without touching them. The release attaches one of those builds as `ClearMD.exe`.
 
 ### On Windows
 `cpp\build_mingw.bat`, `cpp\build_msvc.bat` (x64 Native Tools prompt) or CMake. MSVC links `uuid.lib` through a `#pragma comment`.
@@ -103,7 +106,7 @@ Change wording only together with the README table.
 |---|---|
 | `python tools/test_formats.py` | **The main regression suite.** Extracts the portable core, builds it with ASan + UBSan, generates a sample of every format carrying `Secret...` metadata and checks: strip succeeds, no marker left (also inside zip members), content identical (pixels / decoded audio+video / document text / cell values / ODF structure), in-place length unchanged, idempotent, and truncated + 12 randomly corrupted copies never crash. Also asserts the documented failure (PDF with object streams). `--only mp4,a.pdf`, `--keep DIR`, `--src other.cpp`. |
 | `python tools/sync_viewer.py [--check]` | Re-embeds `cpp/*` and the icon into `CppSourceViewer.tsx`. **Run after every edit under `cpp/`**; `--check` exits 1 if stale. |
-| `python tools/bump_version.py [--set X.Y.Z.W]` | Bumps the file version everywhere (resource.h, manifest, CMake, source header, demo, docs). Does not touch `APP_TITLE`. |
+| `python tools/bump_version.py [--set X.Y]` | Bumps the two-number version everywhere (resource.h, APP_TITLE, manifest, CMake, source header, demo, docs); default +1 on the second number. Renaming the build follows from it - the build scripts read `resource.h`. |
 | `tools/smoke_wine.sh path/to/ClearMD.exe` | Drives the **real exe** under Wine + Xvfb with xdotool: add files, warning dialog, Cancel, Cancel during countdown, full run, resize; checks the files on disk. Takes ~4 minutes - run it in the background if your tool has a 5-minute limit. Needs `wine64 xvfb xdotool imagemagick`. |
 
 Test dependencies: `g++`, `ffmpeg`, and `pip install pillow numpy python-docx openpyxl python-pptx reportlab pikepdf pypdf mutagen pillow-heif`.
@@ -165,8 +168,8 @@ slow themed animation. Closing the window, Esc, or Cancel all mean "do nothing".
 **Keyboard:** Delete and Ctrl+A are intercepted in the main message loop *before* `IsDialogMessageW`, so they work wherever focus is.
 
 **Update check:** one `GET https://api.github.com/repos/finnuen/ClearMD/releases/latest` per launch, started after `ShowWindow` on a
-detached thread. Only `tag_name` and `html_url` are read from the JSON; missing version parts count as 0, so releases must be tagged
-with the build's full file version (`v1.0.0.7`) for the comparison to distinguish builds; a bare `v1.0` equals `1.0.0.0`. Any failure
+detached thread. Only `tag_name` and `html_url` are read from the JSON; missing version parts count as 0, so a release is tagged with
+the same two numbers the build carries (`v1.0`, `v1.1`) and `v1.1` is newer than `1.0`. Any failure
 (offline, 404 when no release exists, rate limit, proxy) is silent. A found update is posted as `WM_APP_UPDATE_FOUND` and shown with a
 Yes/No prompt that opens the release page; nothing is downloaded. Keep it off the UI thread, and never add a static
 `winhttp.lib` dependency - the functions are resolved from `winhttp.dll` at run time.
@@ -206,7 +209,8 @@ share dropping) that the code does not catch - see backlog.
 - Wide strings (`L"..."`) for everything user-visible; `std::string` only for file-format bytes / XML text.
 - Error text from handlers (`why`) is short, user-readable and ends up in the status column as `Failed: <why> (file untouched)`.
 - Keep the portable core free of Win32 so `tools/test_formats.py` keeps compiling it on Linux.
-- Version: `1.0.0.x`, last digit +1 per build (`bump_version.py`); `APP_TITLE` ("ClearMD v1.0") changes only for real major/minor releases.
+- Version: two numbers, `major.minor` (`1.0`; the second one +1 per build). `bump_version.py` writes every copy of it, including
+  `APP_TITLE` ("ClearMD v1.0"), the four Windows VERSIONINFO fields (`1.0` -> `1,0,0,0`) and the demo's badges.
 
 ## 10. Definition of done for a change
 
@@ -216,4 +220,4 @@ share dropping) that the code does not catch - see backlog.
 - [ ] UI change: `tools/smoke_wine.sh` passes (update coordinates if you moved controls)
 - [ ] `python tools/bump_version.py`, build-history row in `RELEASE_NOTES.md`, README tables updated if behaviour changed
 - [ ] `python tools/sync_viewer.py` (then `--check` is clean), `npx tsc --noEmit` and `npx vite build` pass
-- [ ] ship the rebuilt `ClearMD.exe` together with the source zip
+- [ ] publish the rebuilt exe as the release asset, under the unversioned name `ClearMD.exe` (the binary only; the source is at the tag)

@@ -315,7 +315,7 @@ export const ClearMDWindow: React.FC = () => {
             </div>
             <span className="font-semibold text-xs tracking-wide">ClearMD v1.0</span>
             <span className="text-[10px] text-slate-500 font-mono ml-2 border border-slate-300 px-1 rounded-xs">
-              v1.0.0.6 &bull; Lossless Mode
+              v1.0 &bull; Lossless Mode
             </span>
           </div>
 
