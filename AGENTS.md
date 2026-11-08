@@ -169,7 +169,7 @@ slow themed animation. Closing the window, Esc, or Cancel all mean "do nothing".
 
 **Update check:** one `GET https://api.github.com/repos/finnuen/ClearMD/releases/latest` per launch, started after `ShowWindow` on a
 detached thread. Only `tag_name` and `html_url` are read from the JSON; missing version parts count as 0, so a release is tagged with
-the same two numbers the build carries (`v1.0`, `v1.1`) and `v1.1` is newer than `1.0`. Any failure
+the same two numbers the build carries (`1.0`, `1.1`) and titled `ClearMD v<version>`; `1.1` is newer than `1.0`. Any failure
 (offline, 404 when no release exists, rate limit, proxy) is silent. A found update is posted as `WM_APP_UPDATE_FOUND` and shown with a
 Yes/No prompt that opens the release page; nothing is downloaded. Keep it off the UI thread, and never add a static
 `winhttp.lib` dependency - the functions are resolved from `winhttp.dll` at run time.
@@ -209,7 +209,7 @@ share dropping) that the code does not catch - see backlog.
 - Wide strings (`L"..."`) for everything user-visible; `std::string` only for file-format bytes / XML text.
 - Error text from handlers (`why`) is short, user-readable and ends up in the status column as `Failed: <why> (file untouched)`.
 - Keep the portable core free of Win32 so `tools/test_formats.py` keeps compiling it on Linux.
-- Version: two numbers, `major.minor` (`1.0`; the second one +1 per build). `bump_version.py` writes every copy of it, including
+- Version: two numbers, `major.minor` (`1.0`; the second one +1 per build, the leading digit only when the user asks). `bump_version.py` writes every copy of it, including
   `APP_TITLE` ("ClearMD v1.0"), the four Windows VERSIONINFO fields (`1.0` -> `1,0,0,0`) and the demo's badges.
 
 ## 10. Definition of done for a change
