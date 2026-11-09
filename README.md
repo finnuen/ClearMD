@@ -156,6 +156,10 @@ npm install
 npm run dev
 ```
 
+## License
+
+Licensed under the [Apache License 2.0](LICENSE). Copyright 2026 finnuen.
+
 ---
 
 See [RELEASE_NOTES.md](RELEASE_NOTES.md) for what changed, and [AGENTS.md](AGENTS.md) if you want to work on the code (architecture, tests, how to add a format).
